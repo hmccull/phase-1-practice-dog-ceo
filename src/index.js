@@ -1,80 +1,65 @@
 console.log('%c HI', 'color: firebrick')
 
-document.addEventListener('DOMContentLoaded', () => {
-    // request all dog images 
+// ! GLOBAL VARIABLES 
+
+document.addEventListener('DOMContentLoaded', (e) => {
+    // invoke function to load images on page load 
     loadImages();
-    // request all dog breeds
+    // function to load breed list on page load
     loadBreeds();
 })
 
+// ! FETCH FUNCTIONS 
+
 function loadImages() {
-    // request all dog images 
-    fetch("https://dog.ceo/api/breeds/image/random/4")
-    // apply json parse to response
+    // send request to server 
+    fetch('https://dog.ceo/api/breeds/image/random/4')
+    // parse response with json method
     .then(res => res.json())
-    // iterate through image data object and pass values to renderImage as argument
-    .then(imageData => imageData.message.forEach(img => renderImage(img)))
+    // pass parsed response to renderImages to DOM
+    .then(imageData => imageData.message.forEach(image => renderImage(image)));
 }
 
 function loadBreeds() {
-    // request all dog breeds
+    // send request to server 
     fetch('https://dog.ceo/api/breeds/list/all')
-    // apply json parse to response
+    // parse response with json method
     .then(res => res.json())
-    // create var, assign to array created from the object keys from server promise
+    // pass parsed response to renderBreed to DOM
     .then(breedData => {
         breeds = Object.keys(breedData.message);
-        // pass array of breeds to updateBreedList as argument
         updateBreedList(breeds);
-        // invoke breed selector listener
         addBreedSelectorListener();
-    });
+    })
 }
 
+// ! RENDER FUNCTIONS -- DOM MANIPULATION
 
-function renderImage(img) {
-    // set variable equal to parent element
-    const imageDiv = document.getElementById('dog-image-container');
-    // create child element 
-    const imageEl = document.createElement('img');
-    // set img src equal to passed argument from the loadImages fetch
-    imageEl.src = `${img}`;
-    // append img to image div
-    imageDiv.appendChild(imageEl);
+function renderImage(image) {
+    // find image section
+    const imageSection = document.querySelector('#dog-image-container');
+    // create element to display images
+    const imgEl = document.createElement('img');
+    // set new img element src to current image url
+    imgEl.src = `${image}`;
+    // append current image to imageSection
+    imageSection.appendChild(imgEl);
 }
 
 function renderBreed(breed) {
-    // set variable equal to parent element
-    const breedList = document.getElementById('dog-breeds');
-    // create child element
+    // find breedList
+    const breedList = document.querySelector('#dog-breeds');
+    // create element to display breed
     const breedEl = document.createElement('li');
-    // set breedEl content equal to breed data
+    // set new img element src to current image url
     breedEl.innerText = `${breed}`;
-    // append breedEl to ul 
+    // append current breed to breed
     breedList.appendChild(breedEl);
-
-    // event listener for click on breed text -> change text color
-    breedEl.addEventListener('click', handleBreedColor)
-}
-
-// create breed select event listener
-function addBreedSelectorListener() {
-    // set variable equal to desired element 
-    let breedOptions = document.querySelector('#breed-dropdown');
-    // add event listener to the dropdown 
-    breedOptions.addEventListener('change', (e) => {
-        // pass target element value to selectBreedsStartWith function
-        selectBreedsStartWith(e.target.value);
-    });
-}
-
-function selectBreedsStartWith(letter) {
-    // iterate through breed list, pass each matched value to updateBreedList
-    updateBreedList(breeds.filter(breed => breed.startsWith(letter)));
+    // add event listener for click to change text color 
+    breedEl.addEventListener('click', handleBreedElColor);
 }
 
 function updateBreedList(breeds) {
-    // set variable equal to element that needs updated
     let ul = document.querySelector('#dog-breeds');
     // pass element to removeChildren function 
     removeChildren(ul);
@@ -82,11 +67,9 @@ function updateBreedList(breeds) {
     breeds.forEach(breed => renderBreed(breed));
 }
 
-// remove child elements that do not match dropdown menu option that user selects
 function removeChildren(element) {
-    // set variable equal to child element
     let child = element.lastElementChild
-    // while child = true (are still elements being passed from the filtered breeds list)????????
+
     while (child) {
         // remove each element
         element.removeChild(child);
@@ -95,7 +78,22 @@ function removeChildren(element) {
     }
 }
 
-// change the color of breed text when clicked 
-function handleBreedColor(e) {
+// ! FIGURE OUT WAY CHANGE EVENT IS NOT WORKING 
+function addBreedSelectorListener() {
+    // get element for event listener
+    let breedOptions = document.querySelector('#breed-dropdown');
+    breedOptions.addEventListener('change', (e) => {
+        handleBreedChangeSelection(e.target.value);
+    }); 
+}
+
+// ! HANDLER FUNCTIONS
+
+function handleBreedElColor (e) {
+    // change the color of the breedEl when clicked 
     e.target.style.color = 'blue';
+}
+
+function handleBreedChangeSelection(letter) {
+    updateBreedList(breeds.filter(breed => breed.startsWith(letter)));
 }
